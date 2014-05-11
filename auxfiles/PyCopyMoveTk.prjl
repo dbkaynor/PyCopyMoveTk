@@ -1,0 +1,33 @@
+PyCopyMoveTk.py project file
+#All lines with # in the first column are comments
+#All line that do not contain ~ are comments
+#Comments are always stored starting at line 2 in the project file
+
+DestinationEntry01~/home/doug/Music
+DestinationEntry02~/home/doug/Pictures
+DestinationEntry03~/home/doug/DougPython
+DestinationEntry04~/home/doug/dbkaynor@gmail.com
+DestinationEntry05~/home/doug/Desktop
+DestinationEntry06~/home/doug/temp
+DestinationEntry07~/home/doug/tmp
+DestinationEntry08~/home/doug
+KeepFlagsCheckVar~1
+AskOnCopyVar~1
+AskOnMoveVar~1
+AskOnRecycleVar~1
+AskOnDeleteVar~1
+AskOnRenameVar~1
+AskBeforeOverWriteDuringCopyVar~1
+AskBeforeOverWriteDuringMoveVar~1
+DestinationCheck01Var~0
+DestinationCheck02Var~0
+DestinationCheck03Var~0
+DestinationCheck04Var~0
+DestinationCheck05Var~0
+DestinationCheck06Var~0
+DestinationCheck07Var~0
+DestinationCheck08Var~0
+SystemEditorVar~/usr/bin/gedit
+SystemRenamerVar~pyrename
+FileSourceEntry~/home/doug/DougPython/tst02/New New Docment.Txt
+SourcesList~

@@ -1,0 +1,37 @@
+PyCopyMoveTk.py project file
+#All lines with # in the first column are comments
+#All line that do not contain ~ are comments
+#Comments are always stored starting at line 2 in the project file
+
+DestinationEntry01~\\DBKAYNOX-DESK3\temp
+DestinationEntry02~C:\Users\dbkaynox\Google Drive\Pictures
+DestinationEntry03~C:\Users\dbkaynox\DougPython
+DestinationEntry04~C:\Users\dbkaynox\Google Drive\DougPython
+DestinationEntry05~C:\Users\dbkaynox\Desktop
+DestinationEntry06~C:\Users\dbkaynox\Downloads
+DestinationEntry07~C:\Users\dbkaynox\Documents
+DestinationEntry08~C:\Users\dbkaynox\AppData\Local\Temp
+KeepFlagsCheckVar~1
+AskOnCopyVar~1
+AskOnMoveVar~1
+AskOnRecycleVar~1
+AskOnDeleteVar~1
+AskOnRenameVar~1
+AskBeforeOverWriteDuringCopyVar~1
+AskBeforeOverWriteDuringMoveVar~1
+DestinationCheck01Var~0
+DestinationCheck02Var~0
+DestinationCheck03Var~0
+DestinationCheck04Var~1
+DestinationCheck05Var~0
+DestinationCheck06Var~0
+DestinationCheck07Var~0
+DestinationCheck08Var~0
+SystemEditorVar~c:\windows\system32\notepad.exe
+FileSourceEntry~C:\Users\dbkaynox\DougPython\DougPyCopyMove\PyCopyMoveTk.py
+SourcesList~C:\Users\dbkaynox\DougPython\auxfiles\PyCopyMoveTk.hlp
+SourcesList~C:\Users\dbkaynox\DougPython\auxfiles\PyCopyMoveTk.prjl
+SourcesList~C:\Users\dbkaynox\DougPython\auxfiles\PyCopyMoveTk.prjw
+SourcesList~C:\Users\dbkaynox\DougPython\PyBirdsTk.py
+SourcesList~C:\Users\dbkaynox\DougPython\PyCopyMoveTk.py
+SourcesList~C:\Users\dbkaynox\DougPython\test1\Junk.txt
