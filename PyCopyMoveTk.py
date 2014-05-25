@@ -1,7 +1,8 @@
 # https://docs.python.org/3/
 #
 #TODO
-#Check source and destinations for permissions and ownership
+# Check source and destinations for permissions and ownership
+# Color status indicator
 
 #Debug levels
 #Priorities for source file?
@@ -72,24 +73,34 @@ class Vars():
     StartUpDirectoryVar = StringVar()
     AuxDirectoryVar = StringVar()
     HelpFileVar = StringVar()
-    CommentsVarList = []
+    CommentsListVar = []
     HelpTopLevelVar = None
     FileRenameTopLevelVar = None
 #------------------------------
+
+#Parses the frame inspect information
+def MyTrace(FrameInfoDict):
+    filename = 0
+    lineno = 1
+    function = 2
+    return FrameInfoDict[function], FrameInfoDict[lineno], FrameInfoDict[filename]
+#------------------------------
 #LogLevel 0 is log everything
-def Logger(LogMessage, FrameInfoDict, ShowInStatus = False, PrintToCommandLine = False, LogLevel = 0):
+def Logger(LogMessage = '', FrameInfoDict = None, ShowInStatus = False, PrintToCommandLine = False):
     MyLogger = logging.getLogger(Vars.LogFileNameVar.get())
-    mystr = LogMessage + ' Module:' + str(FrameInfoDict[0]) +  '  Line:' + str(FrameInfoDict[1])
+    mystr = LogMessage + '  Trace: ' + str(MyTrace(FrameInfoDict))
     MyLogger.debug(mystr)
     if PrintToCommandLine: print(mystr)
     if ShowInStatus: Vars.StatusVar.set(LogMessage)
+    Main.update()
 '''
 debug, info,warning, error, critical, log, exception
 '''
 #------------------------------
 #Set up defaults in case there is no project file
+#Intialize the variables
+#Written over by StartUpStuff and by ProjectLoad
 def SetDefaults():
-    print('SetDefaults')
     Vars.KeepFlagsCheckVar.set(1)
     Vars.AskOnCopyVar.set(1)
     Vars.AskOnMoveVar.set(1)
@@ -113,7 +124,6 @@ def SetDefaults():
 #------------------------------
 #Initialize the program
 def StartUpStuff():
-    print('StartUpStuff')
     #-- Lots of startup stuff ------------------------------------
     #The following are defaults which will be over written by a project file
     if sys.platform.startswith('linux'):
@@ -128,12 +138,11 @@ def StartUpStuff():
     Vars.StartUpDirectoryVar.set(os.getcwd())
     Vars.AuxDirectoryVar.set(os.path.join(Vars.StartUpDirectoryVar.get(),'auxfiles','.'))
     Vars.HelpFileVar.set(os.path.join(Vars.AuxDirectoryVar.get(), 'PyCopyMoveTk.hlp'))
-    print(Vars.AuxDirectoryVar.get())
     SetUpLogger()
 
     Logger(str(os.environ.get('OS')), getframeinfo(currentframe()))
     Logger(str(platform.uname()), getframeinfo(currentframe()))
-    Logger('Number of argument(s): ' + str(len(sys.argv)), getframeinfo(currentframe()), ShowInStatus = True)
+    Logger('Number of argument(s): ' + str(len(sys.argv)),    getframeinfo(currentframe()))
     Logger('Argument List: ' + str(sys.argv), getframeinfo(currentframe()))
 
     ProjectLoad('default')
@@ -142,6 +151,7 @@ def StartUpStuff():
 #------------------------------
 #Parse the command line
 def ParseCommandLine():
+    Logger('ParseCommandLine', getframeinfo(currentframe()))
     #Test that the file exists on the path
     def is_valid_file(parser, arg):
         if len(arg) == 0: arg = FileSourceEntry.get()
@@ -149,22 +159,25 @@ def ParseCommandLine():
         if not os.path.isfile(arg) and arg != '':
             tkinter.messagebox.showerror('Source file error' , \
                 'The source file does not exist or is not a file\n' + arg)
-            Logger('The source file does not exist or is not a file ' + arg, getframeinfo(currentframe()))
+            Logger('The source file does not exist or is not a file ' + arg,
+            getframeinfo(currentframe()))
         else:
             FileSourceEntry.delete(0, END)
             FileSourceEntry.insert(0, arg)
             Vars.SourceInfoVar.set(FileStat(FileSourceEntry.get()))
-            Logger('Source from command line: >>' + arg + '<<', getframeinfo(currentframe()))
+            Logger('Source from command line: >>' + arg + '<<',
+            getframeinfo(currentframe()))
 
     def is_valid_project(parser, arg):
         if not os.path.isfile(arg):
             tkinter.messagebox.showerror('Project file error' , \
                 'The project file does not exist or is not a file\n' + arg)
-            Logger('The project file does not exist or is not a file ' + arg, getframeinfo(currentframe()))
+            Logger('The project file does not exist or is not a file ' + arg,
+            getframeinfo(currentframe()))
             return
         else:
             Vars. ProjectFileNameVar.set(arg)
-            Logger('Project file from command line: >>' + arg + '<<', getframeinfo(currentframe()))
+            Logger('Project file from command line: >>' + arg, getframeinfo(currentframe()))
 
     parser = argparse.ArgumentParser(description='A tool to help copy or move files.')
 
@@ -173,16 +186,17 @@ def ParseCommandLine():
     parser.add_argument('source', nargs='?', default='', type=lambda x: is_valid_file(parser,x))
     parser.add_argument('-d', '--debug', help='Enable debugging', action='store_true', required=False)
     parser.add_argument('-p', '--project', dest='filename', required=False,
-        help='Specify a project file to use', metavar='FILE', type=lambda x: is_valid_project(parser,x))
+        help='Specify a project file to use', metavar='FILE',
+        type=lambda x: is_valid_project(parser,x))
 
     args = parser.parse_args()
 
     if args.debug:
         import pdb
         pdb.set_trace()
-        Logger('debug is on', getframeinfo(currentframe()), ShowInStatus = True)
+        Logger('debug is on', getframeinfo(currentframe()), ShowInStatus = False)
     else:
-        Logger('debug is off', getframeinfo(currentframe()), ShowInStatus = True)
+        Logger('debug is off', getframeinfo(currentframe()), ShowInStatus = False)
 #------------------------------
 #Try to get source file from clipboard
 def GetClipBoard():
@@ -194,9 +208,11 @@ def GetClipBoard():
             FileSourceEntry.delete(0, END)
             FileSourceEntry.insert(0, temp)
             Vars.SourceInfoVar.set(FileStat(FileSourceEntry.get()))
-            Logger('From clipboard: ' + temp, getframeinfo(currentframe()), ShowInStatus = True)
+            Logger('From clipboard: ' + temp,
+                getframeinfo(currentframe()))
         else:
-            Logger('Invalid path from clipboard: ' + temp, getframeinfo(currentframe()), ShowInStatus = True)
+            Logger('Invalid path from clipboard: ' + temp,
+                getframeinfo(currentframe()))
     except:
         Logger('No clipboard data', getframeinfo(currentframe()), ShowInStatus = True)
 
@@ -204,19 +220,35 @@ def GetClipBoard():
 #This will either delete a file or move it to trash
 def RemoveAFile(File, Trash):
     Logger('Remove a file: ' + File + str(Trash), getframeinfo(currentframe()))
-    #if os.access(FileName,os.W_OK)
     if not os.path.exists(File):
         return
     if Trash:
         try:
             send2trash(File)
+            Logger('Success send2Trash: ' + File,
+                getframeinfo(currentframe()), ShowInStatus = True)
         except OSError:
             tkinter.messagebox.showerror('Send file to trash error. ' ,File + '\nPermissions?')
+            Logger('Failed send2Trash: ' + File,
+                getframeinfo(currentframe()), ShowInStatus = True)
     else:
         try:
             os.remove(File)
+            Logger('Success remove: ' + File,
+                getframeinfo(currentframe()), ShowInStatus = True)
         except OSError:
             tkinter.messagebox.showerror('Delete a file error. ' ,File + '\nPermissions?')
+            Logger('Failed remove: ' + File,
+                getframeinfo(currentframe()), ShowInStatus = True)
+#------------------------------
+#Show Disk Space
+def DiskSpace():
+    DiskSpace = shutil.disk_usage('/')
+    tkinter.messagebox.showinfo('Disk space',
+        'Free: %f Gbytes' %(DiskSpace.free/1e9) +'\n'+
+        'Used: %f Gbytes' %(DiskSpace.used/1e9) +'\n'+
+        'Total: %f Gbytes' %(DiskSpace.total/1e9))
+    Logger('DiskSpace', getframeinfo(currentframe()))
 #------------------------------
 #Setup the logger
 def SetUpLogger():
@@ -243,7 +275,6 @@ class FileRename:
         filename = self.RenameEntry.get()
         self.RenameEntry.delete(0,END)
         self.RenameEntry.insert(0,filename.swapcase())
-        print('==='+filename)
 
     def Titlecase(self):
         filename = self.RenameEntry.get()
@@ -274,7 +305,8 @@ class FileRename:
 
     def Done(self): #Filename will always be the same
         self.AfterFilename = os.path.join(self.Path,self.RenameEntry.get())
-        Logger('Rename. Before: %s  After: %s' % (self.BeforeFilename, self.AfterFilename), getframeinfo(currentframe()))
+        Logger('Rename. Before: %s  After: %s' %
+        (self.BeforeFilename, self.AfterFilename), getframeinfo(currentframe()))
         try:
             os.rename(self.BeforeFilename, self.AfterFilename)
         except OSError as e:
@@ -301,7 +333,8 @@ class FileRename:
         Mainsize = Main.geometry().split('+')
         x = int(Mainsize[1]) + FileRenameTopLevelSizeX / 2
         y = int(Mainsize[2]) + FileRenameTopLevelSizeY / 2
-        Vars.FileRenameTopLevelVar.geometry("%dx%d+%d+%d" % (FileRenameTopLevelSizeX, FileRenameTopLevelSizeY, x, y))
+        Vars.FileRenameTopLevelVar.geometry("%dx%d+%d+%d" %
+        (FileRenameTopLevelSizeX, FileRenameTopLevelSizeY, x, y))
         Vars.FileRenameTopLevelVar.resizable(1,0)
 
         FileRenameFrame1 = Frame(Vars.FileRenameTopLevelVar, relief=SUNKEN, bd=1)
@@ -333,7 +366,7 @@ class FileRename:
         Button(FileRenameFrame3, text='Capitalize', width=10, command=self.Capitalize).pack(side=LEFT)
 
 #------------------------------
-#This function starts a system file such as notepad.exe
+# This function starts a system file such as notepad.exe
 # TODO I can not get it to work with name with spaces
 
 def StartFile(filename, trace ,arg1='', arg2='', arg3=''):
@@ -346,9 +379,7 @@ def StartFile(filename, trace ,arg1='', arg2='', arg3=''):
     else:
         args = [filename, arg1, arg2, arg3]
     Logger('StartFile arguments: ' + str(args), getframeinfo(currentframe()))
-    Logger('StartFile trace: ' + str(trace), getframeinfo(currentframe()), ShowInStatus = True)
     ce = None
-    print(args)
     try:
         ce = subprocess.call(args)
     except OSError:
@@ -371,7 +402,8 @@ def ShowEditFile(FileName=None):
     try:
         StartFile(Vars.SystemEditorVar.get(), ShowEditFile ,FileName)
     except IOError:
-        tkinter.messagebox.showerror('Show/Edit file error', 'Requested file does not exit.\n ' + FileName)
+        tkinter.messagebox.showerror('Show/Edit file error',
+        'Requested file does not exit.\n ' + FileName)
         return
 #------------------------------
 #Loads a project file
@@ -379,18 +411,21 @@ def ShowEditFile(FileName=None):
 #Lines with # in position 0 may be used as comments
 def ProjectLoad(LoadType='none'):
     if LoadType == 'default':
-        Vars.ProjectFileNameVar.set(os.path.join(Vars.AuxDirectoryVar.get(), 'PyCopyMoveTk.'+ Vars.ProjectFileExtensionVar.get()))
+        Vars.ProjectFileNameVar.set(os.path.join(Vars.AuxDirectoryVar.get(),
+        'PyCopyMoveTk.'+ Vars.ProjectFileExtensionVar.get()))
     else:
         Vars.ProjectFileNameVar.set(tkinter.filedialog.askopenfilename(
             defaultextension = Vars.ProjectFileExtensionVar.get(),
-            filetypes = [('Project file','PyCopyMove*.' + Vars.ProjectFileExtensionVar.get()),('All files','*.*')],
+            filetypes = [('Project file','PyCopyMove*.' +
+            Vars.ProjectFileExtensionVar.get()),('All files','*.*')],
             initialdir = Vars.AuxDirectoryVar.get(),
             initialfile = 'PyCopyMoveTk.' + Vars.ProjectFileExtensionVar.get(),
             title = 'Load a PyCopyMoveTk project file',
             parent = Main))
     Vars.ProjectFileNameVar.set(os.path.normpath(Vars.ProjectFileNameVar.get()))
 
-    Logger('Project Load ' + Vars.ProjectFileNameVar.get(), getframeinfo(currentframe()), ShowInStatus = True)
+    Logger('Project Load ' + Vars.ProjectFileNameVar.get(),
+        getframeinfo(currentframe()), ShowInStatus = False)
 
     ProjectEntry.delete(0,END)
     ProjectEntry.insert(0, Vars.ProjectFileNameVar.get())
@@ -399,18 +434,21 @@ def ProjectLoad(LoadType='none'):
     try:
         f = open(Vars.ProjectFileNameVar.get(), 'r')
     except IOError:
-        tkinter.messagebox.showerror('Project file error', 'Requested file does not exist.\n>>' + Vars.ProjectFileNameVar.get() + '<<')
+        tkinter.messagebox.showerror('Project file error',
+        'Requested file does not exist.\n>>' + Vars.ProjectFileNameVar.get() + '<<')
         return
 
     lines = f.readlines()
     f.close()
     try:
-        if not 'PyCopyMoveTk.py project file' in lines[0]:
-            tkinter.messagebox.showerror('Project file error', 'Not a valid project file.\nproject file' + '\n' + lines[0] )
+        if not 'PyCopyMoveTk.py project file ' + sys.platform in lines[0]:
+            tkinter.messagebox.showerror('Project file error',
+            'Not a valid project file.\nproject file' + '\n' + lines[0] )
             Logger('PyCopyMoveTk.py project file ' + lines[0].strip(), getframeinfo(currentframe()))
             return
     except:
-        tkinter.messagebox.showerror('Project file error', 'Unable to read project file' +  Vars.ProjectFileNameVar.get())
+        tkinter.messagebox.showerror('Project file error',
+        'Unable to read project file' +  Vars.ProjectFileNameVar.get())
         Logger('PyCopyMoveTk.py project file. Unable to read file', getframeinfo(currentframe()))
         return
 
@@ -425,7 +463,6 @@ def ProjectLoad(LoadType='none'):
                 t[1] = 0
             elif 'True' in t[1]:
                 t[1] = 1
-
             if 'DestinationEntry01~' in line:
                 x = os.path.normpath(t[1].strip())
                 DestinationEntry01.delete(0,END)
@@ -505,28 +542,28 @@ def ProjectLoad(LoadType='none'):
             if 'SourcesList~' in line:
                 FileSourceListbox.insert(END,t[1].strip())
         else:
-            Vars.CommentsListVar.append(line)
-            #The following are assummed to be comments and are stored as such
             #All lines with # in the first column are comments
             #All line that do not contain ~ are comments
+            Vars.CommentsListVar.append(line)
 
     VerifyPaths('Load')
-    Logger('Project opened: ' + Vars.ProjectFileNameVar.get(), getframeinfo(currentframe()), ShowInStatus = True)
+    Logger('Project opened: ' + Vars.ProjectFileNameVar.get(), getframeinfo(currentframe()))
 #------------------------------
 #Saves a project file
 def ProjectSave():
-    Logger('ProjectSave ' + Vars.ProjectFileNameVar.get(), getframeinfo(currentframe()), ShowInStatus = True)
+    Logger('ProjectSave ' + Vars.ProjectFileNameVar.get(), getframeinfo(currentframe()))
 
     if VerifyPaths('Save') != 0:
         if tkinter.messagebox.askyesno('Bad paths detected','Do you want to continue?') == False:
-            Logger('Project saved aborted. Bad path detected.', getframeinfo(currentframe()), ShowInStatus = True)
+            Logger('Project saved aborted. Bad path detected.',
+            getframeinfo(currentframe()), ShowInStatus = True)
             return
 
     print(os.path.dirname(Vars.AuxDirectoryVar.get()))
     Vars.ProjectFileNameVar.set(tkinter.filedialog.asksaveasfilename(
         defaultextension = Vars.ProjectFileExtensionVar.get(),
             filetypes = [('Project file','PyCopyMove*.' +
-            Vars.ProjectFileExtensionVar.get()),('All files','*.*')],
+             Vars.ProjectFileExtensionVar.get()),('All files','*.*')],
             initialdir = Vars.AuxDirectoryVar.get(),
             initialfile = 'PyCopyMoveTk.' + Vars.ProjectFileExtensionVar.get(),
             title = 'Save a PyCopyMoveTk project file',
@@ -539,12 +576,13 @@ def ProjectSave():
     try:
         f = open(Vars.ProjectFileNameVar.get(), 'w')
     except IOError:
-        tkinter.messagebox.showerror('Project file error', 'Unable to open requested file.\n>>' + Vars.ProjectFileNameVar.get() + '<<')
+        tkinter.messagebox.showerror('Project file error',
+        'Unable to open requested file.\n>>' + Vars.ProjectFileNameVar.get() + '<<')
 
     if not Vars.ProjectFileNameVar.get():
         return
 
-    f.write('PyCopyMoveTk.py project file\n')
+    f.write('PyCopyMoveTk.py project file ' + sys.platform + '\n')
     for item in Vars.CommentsListVar:
         f.write(item)
     f.write('DestinationEntry01~' + DestinationEntry01.get().strip() + '\n')
@@ -561,8 +599,10 @@ def ProjectSave():
     f.write('AskOnRecycleVar~' + str(Vars.AskOnRecycleVar.get()) + '\n')
     f.write('AskOnDeleteVar~' + str(Vars.AskOnDeleteVar.get()) + '\n')
     f.write('AskOnRenameVar~' + str(Vars.AskOnRenameVar.get()) + '\n')
-    f.write('AskBeforeOverWriteDuringCopyVar~' + str(Vars.AskBeforeOverWriteDuringCopyVar.get()) + '\n')
-    f.write('AskBeforeOverWriteDuringMoveVar~' + str(Vars.AskBeforeOverWriteDuringMoveVar.get()) + '\n')
+    f.write('AskBeforeOverWriteDuringCopyVar~' +
+    str(Vars.AskBeforeOverWriteDuringCopyVar.get()) + '\n')
+    f.write('AskBeforeOverWriteDuringMoveVar~' +
+    str(Vars.AskBeforeOverWriteDuringMoveVar.get()) + '\n')
     f.write('DestinationCheck01Var~' + str(Vars.DestinationCheck01Var.get()) + '\n')
     f.write('DestinationCheck02Var~' + str(Vars.DestinationCheck02Var.get()) + '\n')
     f.write('DestinationCheck03Var~' + str(Vars.DestinationCheck03Var.get()) + '\n')
@@ -577,7 +617,8 @@ def ProjectSave():
     for item in FileSourceListbox.get(0,END):
         f.write('SourcesList~' + item + '\n')
     f.close()
-    Logger('Project saved: ' + Vars.ProjectFileNameVar.get(), getframeinfo(currentframe()), ShowInStatus = True)
+    Logger('Project saved: ' + Vars.ProjectFileNameVar.get(),
+    getframeinfo(currentframe()), ShowInStatus = True)
 #------------------------------
 def sha1file(filename):
     sha1 = hashlib.sha1()
@@ -628,41 +669,56 @@ def BrowseDestinationFile(Destination):
     elif Destination == '08': temp = DestinationEntry08.get()
 
     if not os.path.isdir(temp):
-        tkinter.messagebox.showerror('Destination error', 'Destination directory does not exist.\n' + temp)
-        Logger('Destination error. Current destination directory does not exist. ' + temp, getframeinfo(currentframe()))
+        tkinter.messagebox.showerror('Destination error',
+        'Destination directory does not exist.\n' + temp)
+        Logger('Destination error. Current destination directory does not exist. ' +
+        temp, getframeinfo(currentframe()))
 
     DestinationName = tkinter.filedialog.askdirectory(
                         initialdir = temp,
                         parent = Main,
                         title = 'Select a destination directory',
                         mustexist = True)
-    Logger('Browse destination file: ' + Destination + '  ' + DestinationName, getframeinfo(currentframe()), ShowInStatus = True)
+
+    if len(DestinationName) < 1:
+        return #User choose cancel
+
+    Logger('Browse destination file: ' + Destination + '  ' +
+        DestinationName, getframeinfo(currentframe()), ShowInStatus = True)
     if DestinationName:
         DestinationName = os.path.normpath(DestinationName)
         if Destination == '01':
             DestinationEntry01.delete(0, END)
             DestinationEntry01.insert(0,DestinationName)
+            Vars.DestinationCheck01Var.set(1)
         elif Destination == '02':
             DestinationEntry02.delete(0, END)
             DestinationEntry02.insert(0,DestinationName)
+            Vars.DestinationCheck02Var.set(1)
         elif Destination == '03':
             DestinationEntry03.delete(0, END)
             DestinationEntry03.insert(0,DestinationName)
+            Vars.DestinationCheck03Var.set(1)
         elif Destination == '04':
             DestinationEntry04.delete(0, END)
             DestinationEntry04.insert(0,DestinationName)
+            Vars.DestinationCheck04Var.set(1)
         elif Destination == '05':
             DestinationEntry05.delete(0, END)
             DestinationEntry05.insert(0,DestinationName)
+            Vars.DestinationCheck05Var.set(1)
         elif Destination == '06':
             DestinationEntry06.delete(0, END)
             DestinationEntry06.insert(0,DestinationName)
+            Vars.DestinationCheck06Var.set(1)
         elif Destination == '07':
             DestinationEntry07.delete(0, END)
             DestinationEntry07.insert(0,DestinationName)
+            Vars.DestinationCheck07Var.set(1)
         elif Destination == '08':
             DestinationEntry08.delete(0, END)
             DestinationEntry08.insert(0,DestinationName)
+            Vars.DestinationCheck08Var.set(1)
 
 #------------------------------
 #Does the copy or move of the source file to the destination location
@@ -670,26 +726,32 @@ def CopyOrMoveActions(Action, Src, Dest):
     Src = Src.strip('\n').replace('\"','') #remove leading and trailing double quotes
     Dest = Dest.strip('\n').replace('\"','') #remove leading and trailing double quotes
     if not os.path.isfile(Src):
-        tkinter.messagebox.showerror('Source error', 'Source is not a file or does not exist.\n' + Src)
-        Logger(Action + 'Source is not a file or does not exist: ' + Src, getframeinfo(currentframe()), ShowInStatus = True)
+        tkinter.messagebox.showerror('Source error',
+        'Source is not a file or does not exist.\n' + Src)
+        Logger(Action + 'Source is not a file or does not exist: ' +
+        Src, getframeinfo(currentframe()), ShowInStatus = True)
         return
     if not os.path.isdir(Dest):
         tkinter.messagebox.showerror('Destination error', 'Destination is not a directory\n' + Dest)
-        Logger(Action + 'Destination error. Destination is not a directory: ' + Dest, getframeinfo(currentframe()), ShowInStatus = True)
+        Logger(Action + 'Destination error. Destination is not a directory: ' +
+        Dest, getframeinfo(currentframe()), ShowInStatus = True)
         return
 
     if Action == 'Copy':
         if Vars.AskOnCopyVar.get():
             if not tkinter.messagebox.askyesno(Src,
                'Proceed with copy?\nSource: ' + Src + '\nDestination: ' + Dest):
-                Logger(Action + ' aborted by user ' + Src + ' ' + Dest, getframeinfo(currentframe()), ShowInStatus = True)
+                Logger(Action + ' aborted by user ' + Src + ' ' +
+                Dest, getframeinfo(currentframe()), ShowInStatus = True)
                 return
 
         if Vars.AskBeforeOverWriteDuringCopyVar.get():
             if os.path.isfile(os.path.join(Dest, os.path.split(Src)[1])):
                 if not tkinter.messagebox.askyesno('Copy question',
-                    Dest + '\nSource file exists in destination.\nOverwrite?\n' + FileStat(os.path.join(Dest,os.path.split(Src)[1]))):
-                    Logger('Copy overwite aborted by user. ' + Src + ' ' + Dest, getframeinfo(currentframe()), ShowInStatus = True)
+                    Dest + '\nSource file exists in destination.\nOverwrite?\n' +
+                    FileStat(os.path.join(Dest,os.path.split(Src)[1]))):
+                    Logger('Copy overwite aborted by user. ' + Src + ' ' +
+                    Dest, getframeinfo(currentframe()), ShowInStatus = True)
                     return
 
         try:
@@ -708,7 +770,8 @@ def CopyOrMoveActions(Action, Src, Dest):
         if Vars.AskOnMoveVar.get():
             if not tkinter.messagebox.askyesno('Move file',
                 'Proceed with move?\nSource: ' + Src + '\nDestination: ' + Dest):
-                Logger(Action + ' aborted by user. ' + Src + ' ' + Dest, getframeinfo(currentframe()), ShowInStatus = True)
+                Logger(Action + ' aborted by user. ' + Src + ' ' +
+                Dest, getframeinfo(currentframe()), ShowInStatus = True)
                 return
 
         DestFileName = os.path.join(Dest, os.path.split(Src)[1])
@@ -716,21 +779,25 @@ def CopyOrMoveActions(Action, Src, Dest):
             if Vars.AskBeforeOverWriteDuringMoveVar.get():
                 if not tkinter.messagebox.askyesno('Move question',
                     'Source file exists in destination.\nOverwrite?\n' + FileStat(DestFileName)):
-                    Logger('Move overwrite aborted. ' + Src + ' ' + Dest, getframeinfo(currentframe()), ShowInStatus = True)
+                    Logger('Move overwrite aborted. ' + Src + ' ' + Dest,
+                    getframeinfo(currentframe()), ShowInStatus = True)
                     return
-            Logger('Move overwrite dest file removed. ' + Src + ' ' + DestFileName, getframeinfo(currentframe()), ShowInStatus = True)
+            Logger('Move overwrite dest file removed. ' + Src + ' ' +
+            DestFileName, getframeinfo(currentframe()), ShowInStatus = True)
             RemoveAFile(os.path.join(Dest, os.path.split(Src)[1]), Trash = True)
             #send2trash(os.path.join(Dest, os.path.split(Src)[1]))
 
         try:
             shutil.move(Src, Dest)
         except shutil.Error as e:
-            Logger(Action + ' error. Error: %s' % e, getframeinfo(currentframe()), ShowInStatus = True)
+            Logger(Action + ' error. Error: %s' % e, getframeinfo(currentframe()),
+            ShowInStatus = True)
             tkinter.messagebox.showerror('Move error\n', e)
         except OSError as e:
             Logger(Action + ' error: %s' % e, getframeinfo(currentframe()), ShowInStatus = True)
             tkinter.messagebox.showerror('Move error\n', e)
-    Logger(Action + ' Source:' + Src + ' Destination:' + Dest, getframeinfo(currentframe()), ShowInStatus = True)
+    Logger(Action + ' Source:' + Src + ' Destination:' + Dest,
+    getframeinfo(currentframe()), ShowInStatus = True)
 #------------------------------
 #Tests to see where to copy or move the source file to
 #Muliple destinations are valid
@@ -739,17 +806,26 @@ def CopyOrMove(Action):
     Logger(Action + ' ' + Src , getframeinfo(currentframe()))
     count = 0
 
-    if Vars.DestinationCheck01Var.get(): CopyOrMoveActions(Action, Src, DestinationEntry01.get()); count+=1
-    if Vars.DestinationCheck02Var.get(): CopyOrMoveActions(Action, Src, DestinationEntry02.get()); count+=1
-    if Vars.DestinationCheck03Var.get(): CopyOrMoveActions(Action, Src, DestinationEntry03.get()); count+=1
-    if Vars.DestinationCheck04Var.get(): CopyOrMoveActions(Action, Src, DestinationEntry04.get()); count+=1
-    if Vars.DestinationCheck05Var.get(): CopyOrMoveActions(Action, Src, DestinationEntry05.get()); count+=1
-    if Vars.DestinationCheck06Var.get(): CopyOrMoveActions(Action, Src, DestinationEntry06.get()); count+=1
-    if Vars.DestinationCheck07Var.get(): CopyOrMoveActions(Action, Src, DestinationEntry07.get()); count+=1
-    if Vars.DestinationCheck08Var.get(): CopyOrMoveActions(Action, Src, DestinationEntry08.get()); count+=1
+    if Vars.DestinationCheck01Var.get(): CopyOrMoveActions(Action, Src,
+    DestinationEntry01.get()); count+=1
+    if Vars.DestinationCheck02Var.get(): CopyOrMoveActions(Action, Src,
+    DestinationEntry02.get()); count+=1
+    if Vars.DestinationCheck03Var.get(): CopyOrMoveActions(Action, Src,
+    DestinationEntry03.get()); count+=1
+    if Vars.DestinationCheck04Var.get(): CopyOrMoveActions(Action, Src,
+    DestinationEntry04.get()); count+=1
+    if Vars.DestinationCheck05Var.get(): CopyOrMoveActions(Action, Src,
+    DestinationEntry05.get()); count+=1
+    if Vars.DestinationCheck06Var.get(): CopyOrMoveActions(Action, Src,
+    DestinationEntry06.get()); count+=1
+    if Vars.DestinationCheck07Var.get(): CopyOrMoveActions(Action, Src,
+    DestinationEntry07.get()); count+=1
+    if Vars.DestinationCheck08Var.get(): CopyOrMoveActions(Action, Src,
+    DestinationEntry08.get()); count+=1
 
     if count == 0:
-        Logger('Copy Or Move. No destinations specified' +  Src, getframeinfo(currentframe()), ShowInStatus = True)
+        Logger('Copy Or Move. No destinations specified' +  Src,
+        getframeinfo(currentframe()), ShowInStatus = True)
         tkinter.messagebox.showinfo('Copy Or Move', 'No destinations specified\n' + Src)
 #------------------------------
 #Does the copy or move of the source file to the destination location
@@ -764,9 +840,11 @@ def DeleteRecycleRenameInfo(Action):
 
     if Action == 'Recycle':
         if Vars.AskOnRecycleVar.get():
-            if not tkinter.messagebox.askyesno('Recycle','Recycle may not work unless drive is local!\n' +
+            if not tkinter.messagebox.askyesno('Recycle',
+            'Recycle may not work unless drive is local!\n' +
                                    'Proceed with recycle?\nSource: ' + Src):
-                Logger(Action + ' file abort by user. ' + Src, getframeinfo(currentframe()), ShowInStatus = True)
+                Logger(Action + ' file abort by user. ' + Src,
+                getframeinfo(currentframe()), ShowInStatus = True)
                 return
         try:
             #send2trash(Src)
@@ -778,7 +856,8 @@ def DeleteRecycleRenameInfo(Action):
     if Action == 'Delete':
         if Vars.AskOnDeleteVar.get():
             if not tkinter.messagebox.askyesno('Delete file', 'Proceed with delete?\nSource: ' + Src):
-                Logger(Action + ' file abort by user. ' + Src, getframeinfo(currentframe()), ShowInStatus = True)
+                Logger(Action + ' file abort by user. ' + Src,
+                getframeinfo(currentframe()), ShowInStatus = True)
                 return
         try:
             #os.remove(Src)
@@ -826,7 +905,8 @@ def DeleteRecycleRenameInfo(Action):
 def SourceListOperations(Operation):
 
     if not FileSourceListbox.curselection() and (Operation == 'Fetch' or  Operation == 'Remove'):
-        Logger('SourceListOperations: No item selected.', getframeinfo(currentframe()), ShowInStatus = True)
+        Logger('SourceListOperations: No item selected.', getframeinfo(currentframe()),
+        ShowInStatus = True)
         return
 
     if Operation == 'Fetch':
@@ -884,7 +964,8 @@ def ToggleDestinations():
     Vars.DestinationCheck06Var.set(Vars.DestinationCheckToggleStateVar.get())
     Vars.DestinationCheck07Var.set(Vars.DestinationCheckToggleStateVar.get())
     Vars.DestinationCheck08Var.set(Vars.DestinationCheckToggleStateVar.get())
-    Logger('ToggleDestinations  ' + str(Vars.DestinationCheckToggleStateVar.get()), getframeinfo(currentframe()), ShowInStatus = True)
+    Logger('ToggleDestinations  ' + str(Vars.DestinationCheckToggleStateVar.get()),
+    getframeinfo(currentframe()), ShowInStatus = True)
 #------------------------------
 
 #Verify that destinations exist and are writeable
@@ -906,24 +987,31 @@ def VerifyPaths(Type=''):
 
     if len(FileSourceEntry.get()) > 0 and not os.path.isfile(FileSourceEntry.get()):
         Results += 'Source\n'
-    if not os.path.isdir(DestinationEntry01.get()) or not os.access(DestinationEntry01.get(), os.W_OK):
+    if not os.path.isdir(DestinationEntry01.get()) or not os.access(DestinationEntry01.get(),
+    os.W_OK):
         Results += 'Destination 1\n'
-    if not os.path.isdir(DestinationEntry02.get()) or not os.access(DestinationEntry02.get(), os.W_OK):
+    if not os.path.isdir(DestinationEntry02.get()) or not os.access(DestinationEntry02.get(),
+     os.W_OK):
         Results += 'Destination 2\n'
-    if not os.path.isdir(DestinationEntry03.get()) or not os.access(DestinationEntry03.get(), os.W_OK):
+    if not os.path.isdir(DestinationEntry03.get()) or not os.access(DestinationEntry03.get(),
+    os.W_OK):
         Results += 'Destination 3\n'
-    if not os.path.isdir(DestinationEntry04.get()) or not os.access(DestinationEntry04.get(), os.W_OK):
+    if not os.path.isdir(DestinationEntry04.get()) or not os.access(DestinationEntry04.get(),
+    os.W_OK):
         Results += 'Destination 4\n'
-    if not os.path.isdir(DestinationEntry05.get()) or not os.access(DestinationEntry05.get(), os.W_OK):
+    if not os.path.isdir(DestinationEntry05.get()) or not os.access(DestinationEntry05.get(),
+    os.W_OK):
         Results += 'Destination 5\n'
-    if not os.path.isdir(DestinationEntry06.get()) or not os.access(DestinationEntry06.get(), os.W_OK):
+    if not os.path.isdir(DestinationEntry06.get()) or not os.access(DestinationEntry06.get(),
+    os.W_OK):
         Results += 'Destination 6\n'
-    if not os.path.isdir(DestinationEntry07.get()) or not os.access(DestinationEntry07.get(), os.W_OK):
+    if not os.path.isdir(DestinationEntry07.get()) or not os.access(DestinationEntry07.get(),
+    os.W_OK):
         Results += 'Destination 7\n'
-    if not os.path.isdir(DestinationEntry08.get()) or not os.access(DestinationEntry08.get(), os.W_OK):
+    if not os.path.isdir(DestinationEntry08.get()) or not os.access(DestinationEntry08.get(),
+    os.W_OK):
         Results += 'Destination 8\n'
 
-    Logger('VerifyPaths  ', getframeinfo(currentframe()), ShowInStatus = True)
     if len(Results) != 0:
         tkinter.messagebox.showerror('Invalid path(s)','Invalid path(s):\n' + Results)
     else:
@@ -933,22 +1021,26 @@ def VerifyPaths(Type=''):
 #------------------------------
 #Some debug stuff
 def About():
-    Logger('About ' + main.Vars.StartUpDirectoryVar.get(), getframeinfo(currentframe()), ShowInStatus = True)
+    print('Test',getframeinfo(currentframe()))
+    Logger('About ' + main.Vars.StartUpDirectoryVar.get(),
+    getframeinfo(currentframe()), ShowInStatus = True)
     tkinter.messagebox.showinfo('About',  main.Vars.StartUpDirectoryVar.get() +
       '\n' + Main.geometry() +
       '\n' + str(Main.winfo_screenwidth()) + 'x' +  str(Main.winfo_screenheight()) +
       '\n' + 'Python version: ' + platform.python_version() +
       '\n' + platform.platform())
 #------------------------------
-#The help file (someday)
+#The help file
 def Help():
-    Logger('Help ' + main.Vars.StartUpDirectoryVar.get(), getframeinfo(currentframe()), ShowInStatus = True)
+    Logger('Help ' + main.Vars.StartUpDirectoryVar.get(),
+    getframeinfo(currentframe()), ShowInStatus = True)
     Vars.StatusVar.set('Help')
 
     try:
         f = open(Vars.HelpFileVar.get(), 'r')
     except IOError:
-        tkinter.messagebox.showerror('Help file error', 'Requested file does not exist.\n>>' + Vars.HelpFileVar.get() + '<<')
+        tkinter.messagebox.showerror('Help file error',
+        'Requested file does not exist.\n>>' + Vars.HelpFileVar.get() + '<<')
         return
     lines = f.readlines()
     f.close()
@@ -975,7 +1067,8 @@ def Help():
 
     Vars.HelpTopLevelVar.geometry("%dx%d+%d+%d" % (HelpTopLevelX, HelpTopLevelY, x, y))
     Vars.HelpTopLevelVar.resizable(1,1)
-    HelpListbox = Listbox(Vars.HelpTopLevelVar, height=3, font='Courier 8' , yscrollcommand=yScroll.set, xscrollcommand=xScroll.set)
+    HelpListbox = Listbox(Vars.HelpTopLevelVar, height=3, font='Courier 8' ,
+    yscrollcommand=yScroll.set, xscrollcommand=xScroll.set)
     HelpListbox.pack(fill=BOTH, expand=YES)
 
     yScroll.config(command=HelpListbox.yview)
@@ -1001,16 +1094,20 @@ ProjectsMenu.add_command(label='Edit', command=lambda: ShowEditFile(ProjectEntry
 menubar.add_cascade(menu=SourceMenu, label='Source')
 SourceMenu.add_command(label='Browse for source file', command=BrowseSourceFile)
 SourceMenu.add_command(label='Add source to list', command=lambda: SourceListOperations('Add'))
-SourceMenu.add_command(label='Remove source from list', command=lambda: SourceListOperations('Remove'))
-SourceMenu.add_command(label='Fetch source from list', command=lambda: SourceListOperations('Fetch'))
+SourceMenu.add_command(label='Remove source from list',
+    command=lambda: SourceListOperations('Remove'))
+SourceMenu.add_command(label='Fetch source from list',
+    command=lambda: SourceListOperations('Fetch'))
 
 menubar.add_cascade(menu=OtherMenu, label='Other')
 OtherMenu.add_command(label='Get Clipboard', command=GetClipBoard)
-OtherMenu.add_command(label='View log', command=lambda: StartFile(Vars.SystemEditorVar.get(),'View log' ,Vars.LogFileNameVar.get()))
+OtherMenu.add_command(label='View log',
+    command=lambda: StartFile(Vars.SystemEditorVar.get(),'View log' ,Vars.LogFileNameVar.get()))
 OtherMenu.add_command(label='ViewEdit any file', command=ViewEditAnyFile)
 OtherMenu.add_command(label='About', command=About)
 OtherMenu.add_command(label='Help', command=Help)
 OtherMenu.add_command(label='Verify paths', command=VerifyPaths)
+OtherMenu.add_command(label='Show disk space',command=DiskSpace)
 
 menubar.add_cascade(menu=OptionsMenu, label='Options')
 OptionsMenu.add_checkbutton(label='Keep flags on copy and move', variable=Vars.KeepFlagsCheckVar)
@@ -1019,8 +1116,10 @@ OptionsMenu.add_checkbutton(label='Ask on move', variable=Vars.AskOnMoveVar)
 OptionsMenu.add_checkbutton(label='Ask on recyle', variable=Vars.AskOnRecycleVar)
 OptionsMenu.add_checkbutton(label='Ask on delete', variable=Vars.AskOnDeleteVar)
 OptionsMenu.add_checkbutton(label='Ask on rename', variable=Vars.AskOnRenameVar)
-OptionsMenu.add_checkbutton(label='Ask before overwrite during copy', variable=Vars.AskBeforeOverWriteDuringCopyVar)
-OptionsMenu.add_checkbutton(label='Ask before overwrite during move', variable=Vars.AskBeforeOverWriteDuringMoveVar)
+OptionsMenu.add_checkbutton(label='Ask before overwrite during copy',
+    variable=Vars.AskBeforeOverWriteDuringCopyVar)
+OptionsMenu.add_checkbutton(label='Ask before overwrite during move',
+    variable=Vars.AskBeforeOverWriteDuringMoveVar)
 #---------------
 FileFrame1 = Frame(Main, relief=SUNKEN, bd=1)
 FileFrame1.pack(fill=X, side=TOP)
@@ -1059,7 +1158,8 @@ yScroll = Scrollbar(FileFrame4, orient=VERTICAL)
 yScroll.pack(side=RIGHT, fill=Y)
 xScroll = Scrollbar(FileFrame4, orient=HORIZONTAL)
 xScroll.pack(side=BOTTOM, fill=X)
-FileSourceListbox = Listbox(FileFrame4, height=3, yscrollcommand=yScroll.set, xscrollcommand=xScroll.set)
+FileSourceListbox = Listbox(FileFrame4, height=3,
+yscrollcommand=yScroll.set, xscrollcommand=xScroll.set)
 FileSourceListbox.pack(fill=BOTH, expand=YES)
 
 FileSourceListbox.bind('<Double-Button-1>', lambda x: SourceListOperations('Fetch') )
@@ -1074,15 +1174,20 @@ Label(OperationFrame, text='Operations',font=("Helvetica", 15)).pack(side=TOP, f
 
 Button(OperationFrame, width=10, text='Copy',command=lambda: CopyOrMove('Copy')).pack(side=LEFT)
 Button(OperationFrame, width=10, text='Move',command=lambda: CopyOrMove('Move')).pack(side=LEFT)
-Button(OperationFrame, width=10, text='Recycle',command=lambda: DeleteRecycleRenameInfo('Recycle')).pack(side=LEFT)
-Button(OperationFrame, width=10, text='Delete',command=lambda: DeleteRecycleRenameInfo('Delete')).pack(side=LEFT)
-Button(OperationFrame, width=10, text='Rename',command=lambda: DeleteRecycleRenameInfo('Rename')).pack(side=LEFT)
-Button(OperationFrame, width=10, text='Info',command=lambda: DeleteRecycleRenameInfo('Info')).pack(side=LEFT)
+Button(OperationFrame, width=10, text='Recycle',
+command=lambda: DeleteRecycleRenameInfo('Recycle')).pack(side=LEFT)
+Button(OperationFrame, width=10, text='Delete',
+command=lambda: DeleteRecycleRenameInfo('Delete')).pack(side=LEFT)
+Button(OperationFrame, width=10, text='Rename',
+command=lambda: DeleteRecycleRenameInfo('Rename')).pack(side=LEFT)
+Button(OperationFrame, width=10, text='Info',
+command=lambda: DeleteRecycleRenameInfo('Info')).pack(side=LEFT)
 #------------------------------
 DestinationFrame = Frame(Main, relief=SUNKEN, bd=1)
 DestinationFrame.pack(fill=X)
 ToolTip(DestinationFrame,'Chose/add a destination path')
-Label(DestinationFrame, text='Destination directories',font=("Helvetica", 15)).pack(side=TOP, fill=BOTH, expand=YES)
+Label(DestinationFrame, text='Destination directories',
+font=("Helvetica", 15)).pack(side=TOP, fill=BOTH, expand=YES)
 
 ToggleAllButton = Button(DestinationFrame, width=15, text='Toggle all',command=ToggleDestinations)
 ToggleAllButton.pack()
