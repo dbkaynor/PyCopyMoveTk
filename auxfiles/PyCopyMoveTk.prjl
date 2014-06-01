@@ -29,5 +29,9 @@ DestinationCheck07Var~0
 DestinationCheck08Var~0
 SystemEditorVar~/usr/bin/gedit
 SystemRenamerVar~pyrename
-FileSourceEntry~/home/doug/DougPython/tst02/New New Docment.Txt
-SourcesList~
+FileSourceEntry~/home/doug/DougPython/DougPyCopyMove/auxfiles/ToolTip.py
+SourcesList~/home/doug/DougPython
+SourcesList~/home/doug/DougPython/DougPyCopyMove/auxfiles/ToolTip.py
+SourcesList~/home/doug/Downloads
+SourcesList~/home/doug/temp
+SourcesList~/home/doug/tmp
