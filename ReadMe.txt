@@ -1,6 +1,6 @@
 PyCopyMoveTk
   Requirements:
-    python 3.x (tested with 3.2 and 3.4)
+    python 3.x (tested with 3.2, 3.4, and 3.61)
     The following modules:
         tkinter module
         send2trash module

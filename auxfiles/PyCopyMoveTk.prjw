@@ -3,15 +3,21 @@ PyCopyMoveTk.py project file win32
 #All line that do not contain ~ are comments
 #Comments are always stored starting at line 2 in the project file
 
-DestinationEntry01~\\DBKAYNOX-DESK3\temp
-DestinationEntry02~C:\Users\dbkaynox\Google Drive\Pictures
-DestinationEntry03~C:\Users\dbkaynox\DougPython
-DestinationEntry04~C:\Users\dbkaynox\Google Drive\DougPython
-DestinationEntry05~C:\Users\dbkaynox\Desktop
-DestinationEntry06~C:\Users\dbkaynox\Downloads
-DestinationEntry07~C:\Users\dbkaynox\Documents
-DestinationEntry08~C:\Users\dbkaynox\AppData\Local\Temp
+DestinationEntry01~C:\Users\dkaynor\DougPython\DougPyCopyMove\auxfiles
+DestinationEntry02~C:\Users\dkaynor\DougPython
+DestinationEntry03~C:\Users\dkaynor\Google Drive\AndroidStudioProjects
+DestinationEntry04~
+DestinationEntry05~C:\Users\dkaynor\Google Drive\DougPython
+DestinationEntry06~C:\Users\dkaynor\Google Drive\DougPython\DougPyBirds
+DestinationEntry07~C:\Users\dkaynor\Google Drive\DougPython\DougPyCopyMove
+DestinationEntry08~C:\Users\dkaynor\Google Drive\DougPython\DougPyDiff
+DestinationEntry09~C:\Users\dkaynor\Downloads
+DestinationEntry10~C:\Users\dkaynor\Google Drive\Pictures
+DestinationEntry11~C:\Users\dkaynor\Google Drive\DougPerl
+DestinationEntry12~C:\Users\dkaynor\Documents
 KeepFlagsCheckVar~1
+CheckSourceOnStartVar~True
+ClearSourceOnStartVar~0
 AskOnCopyVar~1
 AskOnMoveVar~1
 AskOnRecycleVar~1
@@ -19,19 +25,26 @@ AskOnDeleteVar~1
 AskOnRenameVar~1
 AskBeforeOverWriteDuringCopyVar~1
 AskBeforeOverWriteDuringMoveVar~1
-DestinationCheck01Var~0
-DestinationCheck02Var~0
-DestinationCheck03Var~0
+DestinationCheck01Var~1
+DestinationCheck02Var~1
+DestinationCheck03Var~1
 DestinationCheck04Var~1
 DestinationCheck05Var~0
 DestinationCheck06Var~0
 DestinationCheck07Var~0
 DestinationCheck08Var~0
+DestinationCheck09Var~1
+DestinationCheck10Var~0
+DestinationCheck11Var~0
+DestinationCheck12Var~0
 SystemEditorVar~c:\windows\system32\notepad.exe
-FileSourceEntry~C:\Users\dbkaynox\DougPython\DougPyCopyMove\PyCopyMoveTk.py
-SourcesList~C:\Users\dbkaynox\DougPython\auxfiles\PyCopyMoveTk.hlp
-SourcesList~C:\Users\dbkaynox\DougPython\auxfiles\PyCopyMoveTk.prjl
-SourcesList~C:\Users\dbkaynox\DougPython\auxfiles\PyCopyMoveTk.prjw
-SourcesList~C:\Users\dbkaynox\DougPython\PyBirdsTk.py
-SourcesList~C:\Users\dbkaynox\DougPython\PyCopyMoveTk.py
-SourcesList~C:\Users\dbkaynox\DougPython\test1\Junk.txt
+SystemRenamerVar~C:\Program Files (x86)\Ant Renamer\Renamer.exe
+FileSourceEntry~
+SourcesList~C:\Users\dkaynor\DougPython\DougPyBirds
+SourcesList~C:\Users\dkaynor\DougPython\DougPyCopyMove
+SourcesList~C:\Users\dkaynor\DougPython\DougPyDiff
+SourcesList~C:\Users\dkaynor\Downloads\
+SourcesList~C:\Users\dkaynor\Google Drive\DougAutoIt
+SourcesList~C:\Users\dkaynor\Google Drive\DougPython\DougPyBirds
+SourcesList~C:\Users\dkaynor\Google Drive\DougPython\DougPyCopyMove
+SourcesList~C:\Users\dkaynor\Google Drive\DougPython\DougPyDiff

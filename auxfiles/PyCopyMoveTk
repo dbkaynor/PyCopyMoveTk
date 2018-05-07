@@ -1,0 +1,50 @@
+PyCopyMoveTk.py project file win32
+#All lines with # in the first column are comments
+#All line that do not contain ~ are comments
+#Comments are always stored starting at line 2 in the project file
+
+DestinationEntry01~C:\Users\dbkaynox\DougPython\DougPyCopyMove\auxfiles
+DestinationEntry02~C:\Users\dbkaynox\DougPython
+DestinationEntry03~C:\Users\dbkaynox\Google Drive\AndroidStudioProjects
+DestinationEntry04~C:\Users\dbkaynox\AndroidStudioProjects
+DestinationEntry05~C:\Users\dbkaynox\Google Drive\DougPython
+DestinationEntry06~C:\Users\dbkaynox\Google Drive\DougPython\DougPyBirds
+DestinationEntry07~C:\Users\dbkaynox\Google Drive\DougPython\DougPyCopyMove
+DestinationEntry08~C:\Users\dbkaynox\Google Drive\DougPython\DougPyDiff
+DestinationEntry09~C:\Users\dbkaynox\Downloads
+DestinationEntry10~C:\Users\dbkaynox\Google Drive\Pictures
+DestinationEntry11~C:\Users\dbkaynox\Google Drive\DougPerl
+DestinationEntry12~C:\Users\dbkaynox\Documents
+KeepFlagsCheckVar~True
+CheckSourceOnStartVar~False
+ClearSourceOnStartVar~False
+AskOnCopyVar~True
+AskOnMoveVar~True
+AskOnRecycleVar~True
+AskOnDeleteVar~True
+AskOnRenameVar~True
+AskBeforeOverWriteDuringCopyVar~True
+AskBeforeOverWriteDuringMoveVar~True
+DestinationCheck01Var~True
+DestinationCheck02Var~True
+DestinationCheck03Var~True
+DestinationCheck04Var~True
+DestinationCheck05Var~False
+DestinationCheck06Var~False
+DestinationCheck07Var~False
+DestinationCheck08Var~False
+DestinationCheck09Var~True
+DestinationCheck10Var~False
+DestinationCheck11Var~False
+DestinationCheck12Var~False
+SystemEditorVar~c:\windows\system32\notepad.exe
+SystemRenamerVar~C:\Program Files (x86)\Ant Renamer\Renamer.exe
+FileSourceEntry~
+SourcesList~C:\Users\dbkaynox\DougPython\DougPyBirds
+SourcesList~C:\Users\dbkaynox\DougPython\DougPyCopyMove
+SourcesList~C:\Users\dbkaynox\DougPython\DougPyDiff
+SourcesList~C:\Users\dbkaynox\Downloads\
+SourcesList~C:\Users\dbkaynox\Google Drive\DougAutoIt
+SourcesList~C:\Users\dbkaynox\Google Drive\DougPython\DougPyBirds
+SourcesList~C:\Users\dbkaynox\Google Drive\DougPython\DougPyCopyMove
+SourcesList~C:\Users\dbkaynox\Google Drive\DougPython\DougPyDiff

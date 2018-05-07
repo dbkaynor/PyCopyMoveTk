@@ -3,7 +3,8 @@
 ######################################################################
 """create and manipulate C data types in Python"""
 
-import os as _os, sys as _sys
+import os as _os
+import sys as _sys
 
 __version__ = "1.1.0"
 
@@ -33,9 +34,9 @@ if _os.name == "posix" and _sys.platform == "darwin":
         DEFAULT_MODE = RTLD_GLOBAL
 
 from _ctypes import FUNCFLAG_CDECL as _FUNCFLAG_CDECL, \
-     FUNCFLAG_PYTHONAPI as _FUNCFLAG_PYTHONAPI, \
-     FUNCFLAG_USE_ERRNO as _FUNCFLAG_USE_ERRNO, \
-     FUNCFLAG_USE_LASTERROR as _FUNCFLAG_USE_LASTERROR
+    FUNCFLAG_PYTHONAPI as _FUNCFLAG_PYTHONAPI, \
+    FUNCFLAG_USE_ERRNO as _FUNCFLAG_USE_ERRNO, \
+    FUNCFLAG_USE_LASTERROR as _FUNCFLAG_USE_LASTERROR
 
 """
 WINOLEAPI -> HRESULT
@@ -49,6 +50,7 @@ STDMETHOD_(type, name)
 STDAPICALLTYPE
 """
 
+
 def create_string_buffer(init, size=None):
     """create_string_buffer(aString) -> character array
     create_string_buffer(anInteger) -> character array
@@ -56,7 +58,7 @@ def create_string_buffer(init, size=None):
     """
     if isinstance(init, (str, unicode)):
         if size is None:
-            size = len(init)+1
+            size = len(init) + 1
         buftype = c_char * size
         buf = buftype()
         buf.value = init
@@ -67,14 +69,17 @@ def create_string_buffer(init, size=None):
         return buf
     raise TypeError(init)
 
+
 def c_buffer(init, size=None):
-##    "deprecated, use create_string_buffer instead"
-##    import warnings
-##    warnings.warn("c_buffer is deprecated, use create_string_buffer instead",
-##                  DeprecationWarning, stacklevel=2)
+    ##    "deprecated, use create_string_buffer instead"
+    ##    import warnings
+    # warnings.warn("c_buffer is deprecated, use create_string_buffer instead",
+    # DeprecationWarning, stacklevel=2)
     return create_string_buffer(init, size)
 
 _c_functype_cache = {}
+
+
 def CFUNCTYPE(restype, *argtypes, **kw):
     """CFUNCTYPE(restype, *argtypes,
                  use_errno=False, use_last_error=False) -> function prototype.
@@ -116,6 +121,7 @@ if _os.name in ("nt", "ce"):
         _FUNCFLAG_STDCALL = _FUNCFLAG_CDECL
 
     _win_functype_cache = {}
+
     def WINFUNCTYPE(restype, *argtypes, **kw):
         # docstring set later (very similar to CFUNCTYPE.__doc__)
         flags = _FUNCFLAG_STDCALL
@@ -135,7 +141,8 @@ if _os.name in ("nt", "ce"):
             _win_functype_cache[(restype, argtypes, flags)] = WinFunctionType
             return WinFunctionType
     if WINFUNCTYPE.__doc__:
-        WINFUNCTYPE.__doc__ = CFUNCTYPE.__doc__.replace("CFUNCTYPE", "WINFUNCTYPE")
+        WINFUNCTYPE.__doc__ = CFUNCTYPE.__doc__.replace(
+            "CFUNCTYPE", "WINFUNCTYPE")
 
 elif _os.name == "posix":
     from _ctypes import dlopen as _dlopen
@@ -143,6 +150,7 @@ elif _os.name == "posix":
 from _ctypes import sizeof, byref, addressof, alignment, resize
 from _ctypes import get_errno, set_errno
 from _ctypes import _SimpleCData
+
 
 def _check_size(typ, typecode=None):
     # Check if sizeof(ctypes_type) against struct.calcsize.  This
@@ -153,11 +161,13 @@ def _check_size(typ, typecode=None):
         typecode = typ._type_
     actual, required = sizeof(typ), calcsize(typecode)
     if actual != required:
-        raise SystemError("sizeof(%s) wrong: %d instead of %d" % \
+        raise SystemError("sizeof(%s) wrong: %d instead of %d" %
                           (typ, actual, required))
+
 
 class py_object(_SimpleCData):
     _type_ = "O"
+
     def __repr__(self):
         try:
             return super(py_object, self).__repr__()
@@ -165,17 +175,21 @@ class py_object(_SimpleCData):
             return "%s(<NULL>)" % type(self).__name__
 _check_size(py_object, "P")
 
+
 class c_short(_SimpleCData):
     _type_ = "h"
 _check_size(c_short)
+
 
 class c_ushort(_SimpleCData):
     _type_ = "H"
 _check_size(c_ushort)
 
+
 class c_long(_SimpleCData):
     _type_ = "l"
 _check_size(c_long)
+
 
 class c_ulong(_SimpleCData):
     _type_ = "L"
@@ -194,13 +208,16 @@ else:
         _type_ = "I"
     _check_size(c_uint)
 
+
 class c_float(_SimpleCData):
     _type_ = "f"
 _check_size(c_float)
 
+
 class c_double(_SimpleCData):
     _type_ = "d"
 _check_size(c_double)
+
 
 class c_longdouble(_SimpleCData):
     _type_ = "g"
@@ -208,7 +225,8 @@ if sizeof(c_longdouble) == sizeof(c_double):
     c_longdouble = c_double
 
 if _calcsize("l") == _calcsize("q"):
-    # if long and long long have the same size, make c_longlong an alias for c_long
+    # if long and long long have the same size, make c_longlong an alias for
+    # c_long
     c_longlong = c_long
     c_ulonglong = c_ulong
 else:
@@ -218,10 +236,11 @@ else:
 
     class c_ulonglong(_SimpleCData):
         _type_ = "Q"
-    ##    def from_param(cls, val):
-    ##        return ('d', float(val), val)
+    # def from_param(cls, val):
+    # return ('d', float(val), val)
     ##    from_param = classmethod(from_param)
     _check_size(c_ulonglong)
+
 
 class c_ubyte(_SimpleCData):
     _type_ = "B"
@@ -230,15 +249,18 @@ c_ubyte.__ctype_le__ = c_ubyte.__ctype_be__ = c_ubyte
 ##c_uchar = c_ubyte
 _check_size(c_ubyte)
 
+
 class c_byte(_SimpleCData):
     _type_ = "b"
 c_byte.__ctype_le__ = c_byte.__ctype_be__ = c_byte
 _check_size(c_byte)
 
+
 class c_char(_SimpleCData):
     _type_ = "c"
 c_char.__ctype_le__ = c_char.__ctype_be__ = c_char
 _check_size(c_char)
+
 
 class c_char_p(_SimpleCData):
     _type_ = "z"
@@ -252,10 +274,12 @@ class c_char_p(_SimpleCData):
             return "%s(%s)" % (self.__class__.__name__, cast(self, c_void_p).value)
 _check_size(c_char_p, "P")
 
+
 class c_void_p(_SimpleCData):
     _type_ = "P"
-c_voidp = c_void_p # backwards compatibility (to a bug)
+c_voidp = c_void_p  # backwards compatibility (to a bug)
 _check_size(c_void_p)
+
 
 class c_bool(_SimpleCData):
     _type_ = "?"
@@ -278,7 +302,8 @@ else:
     class c_wchar(_SimpleCData):
         _type_ = "u"
 
-    POINTER(c_wchar).from_param = c_wchar_p.from_param #_SimpleCData.c_wchar_p_from_param
+    # _SimpleCData.c_wchar_p_from_param
+    POINTER(c_wchar).from_param = c_wchar_p.from_param
 
     def create_unicode_buffer(init, size=None):
         """create_unicode_buffer(aString) -> character array
@@ -287,7 +312,7 @@ else:
         """
         if isinstance(init, (str, unicode)):
             if size is None:
-                size = len(init)+1
+                size = len(init) + 1
             buftype = c_wchar * size
             buf = buftype()
             buf.value = init
@@ -298,9 +323,12 @@ else:
             return buf
         raise TypeError(init)
 
-POINTER(c_char).from_param = c_char_p.from_param #_SimpleCData.c_char_p_from_param
+# _SimpleCData.c_char_p_from_param
+POINTER(c_char).from_param = c_char_p.from_param
 
 # XXX Deprecated
+
+
 def SetPointerType(pointer, cls):
     if _pointer_type_cache.get(cls, None) is not None:
         raise RuntimeError("This type already exists in the cache")
@@ -311,6 +339,8 @@ def SetPointerType(pointer, cls):
     del _pointer_type_cache[id(pointer)]
 
 # XXX Deprecated
+
+
 def ARRAY(typ, len):
     return typ * len
 
@@ -357,8 +387,8 @@ class CDLL(object):
     def __repr__(self):
         return "<%s '%s', handle %x at %x>" % \
                (self.__class__.__name__, self._name,
-                (self._handle & (_sys.maxint*2 + 1)),
-                id(self) & (_sys.maxint*2 + 1))
+                (self._handle & (_sys.maxint * 2 + 1)),
+                id(self) & (_sys.maxint * 2 + 1))
 
     def __getattr__(self, name):
         if name.startswith('__') and name.endswith('__'):
@@ -372,6 +402,7 @@ class CDLL(object):
         if not isinstance(name_or_ordinal, (int, long)):
             func.__name__ = name_or_ordinal
         return func
+
 
 class PyDLL(CDLL):
     """This class represents the Python library itself.  It allows to
@@ -391,6 +422,7 @@ if _os.name in ("nt", "ce"):
     # XXX Hm, what about HRESULT as normal parameter?
     # Mustn't it derive from c_long then?
     from _ctypes import _check_HRESULT, _SimpleCData
+
     class HRESULT(_SimpleCData):
         _type_ = "l"
         # _check_retval_ is called with the function's result when it
@@ -413,7 +445,9 @@ if _os.name in ("nt", "ce"):
         _func_flags_ = _FUNCFLAG_STDCALL
         _func_restype_ = HRESULT
 
+
 class LibraryLoader(object):
+
     def __init__(self, dlltype):
         self._dlltype = dlltype
 
@@ -474,11 +508,12 @@ elif sizeof(c_ulonglong) == sizeof(c_void_p):
 
 from _ctypes import _memmove_addr, _memset_addr, _string_at_addr, _cast_addr
 
-## void *memmove(void *, const void *, size_t);
+# void *memmove(void *, const void *, size_t);
 memmove = CFUNCTYPE(c_void_p, c_void_p, c_void_p, c_size_t)(_memmove_addr)
 
-## void *memset(void *, int, size_t)
+# void *memset(void *, int, size_t)
 memset = CFUNCTYPE(c_void_p, c_void_p, c_int, c_size_t)(_memset_addr)
+
 
 def PYFUNCTYPE(restype, *argtypes):
     class CFunctionType(_CFuncPtr):
@@ -488,10 +523,14 @@ def PYFUNCTYPE(restype, *argtypes):
     return CFunctionType
 
 _cast = PYFUNCTYPE(py_object, c_void_p, py_object, py_object)(_cast_addr)
+
+
 def cast(obj, typ):
     return _cast(obj, obj, typ)
 
 _string_at = PYFUNCTYPE(py_object, c_void_p, c_int)(_string_at_addr)
+
+
 def string_at(ptr, size=-1):
     """string_at(addr[, size]) -> string
 
@@ -504,6 +543,7 @@ except ImportError:
     pass
 else:
     _wstring_at = PYFUNCTYPE(py_object, c_void_p, c_int)(_wstring_at_addr)
+
     def wstring_at(ptr, size=-1):
         """wstring_at(addr[, size]) -> string
 
@@ -511,20 +551,22 @@ else:
         return _wstring_at(ptr, size)
 
 
-if _os.name in ("nt", "ce"): # COM stuff
+if _os.name in ("nt", "ce"):  # COM stuff
     def DllGetClassObject(rclsid, riid, ppv):
         try:
-            ccom = __import__("comtypes.server.inprocserver", globals(), locals(), ['*'])
+            ccom = __import__("comtypes.server.inprocserver",
+                              globals(), locals(), ['*'])
         except ImportError:
-            return -2147221231 # CLASS_E_CLASSNOTAVAILABLE
+            return -2147221231  # CLASS_E_CLASSNOTAVAILABLE
         else:
             return ccom.DllGetClassObject(rclsid, riid, ppv)
 
     def DllCanUnloadNow():
         try:
-            ccom = __import__("comtypes.server.inprocserver", globals(), locals(), ['*'])
+            ccom = __import__("comtypes.server.inprocserver",
+                              globals(), locals(), ['*'])
         except ImportError:
-            return 0 # S_OK
+            return 0  # S_OK
         return ccom.DllCanUnloadNow()
 
 from ctypes._endian import BigEndianStructure, LittleEndianStructure
@@ -533,13 +575,19 @@ from ctypes._endian import BigEndianStructure, LittleEndianStructure
 c_int8 = c_byte
 c_uint8 = c_ubyte
 for kind in [c_short, c_int, c_long, c_longlong]:
-    if sizeof(kind) == 2: c_int16 = kind
-    elif sizeof(kind) == 4: c_int32 = kind
-    elif sizeof(kind) == 8: c_int64 = kind
+    if sizeof(kind) == 2:
+        c_int16 = kind
+    elif sizeof(kind) == 4:
+        c_int32 = kind
+    elif sizeof(kind) == 8:
+        c_int64 = kind
 for kind in [c_ushort, c_uint, c_ulong, c_ulonglong]:
-    if sizeof(kind) == 2: c_uint16 = kind
-    elif sizeof(kind) == 4: c_uint32 = kind
-    elif sizeof(kind) == 8: c_uint64 = kind
+    if sizeof(kind) == 2:
+        c_uint16 = kind
+    elif sizeof(kind) == 4:
+        c_uint32 = kind
+    elif sizeof(kind) == 8:
+        c_uint64 = kind
 del(kind)
 
 # XXX for whatever reasons, creating the first instance of a callback
